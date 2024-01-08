@@ -4,13 +4,25 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"gopkg.in/yaml.v3"
+	"os"
+	"path"
+
+	// "gopkg.in/yaml.v3"
 )
 
 func main() {
 	fmt.Println("Hello, World!")
-	ip := getIp()
-	fmt.Println(ip)
+	pwd, err := os.Getwd();
+	data, err := os.ReadFile(path.Join(pwd, "config.yaml"))
+	if err != nil {
+		fmt.Println("Error reading config file")
+		panic(err)
+	}
+	fmt.Println(string(data))
+
+
+	// ip := getIp()
+	// fmt.Println(ip)
 }
 
 func getIp() string {
