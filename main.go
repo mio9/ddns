@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"gopkg.in/yaml.v3"
 )
 
 func main() {
 	fmt.Println("Hello, World!")
 	ip := getIp()
-
+	fmt.Println(ip)
 }
 
 func getIp() string {
