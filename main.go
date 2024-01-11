@@ -23,7 +23,7 @@ func main() {
 	pwd, err := os.Getwd()
 	data, err := os.ReadFile(path.Join(pwd, "config.yaml"))
 	if err != nil {
-		fmt.Println("Error reading config file")
+		fmt.Println("Error reading config file, please create config.yaml")
 		panic(err)
 	}
 
