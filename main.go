@@ -18,21 +18,7 @@ type Config struct {
 
 func main() {
 	// Read config file
-	config := Config{}
-
-	pwd, err := os.Getwd()
-	data, err := os.ReadFile(path.Join(pwd, "config.yaml"))
-	if err != nil {
-		fmt.Println("Error reading config file, please create config.yaml")
-		panic(err)
-	}
-
-	err = yaml.Unmarshal(data, &config)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-		panic(err)
-	}
-
+	config := getConfig()
 	// setup HTTP client
 	client := &http.Client{}
 	// read args
@@ -51,7 +37,7 @@ func main() {
 		if args[1] == "zones" {
 			// list zones
 			fmt.Println("listing zones")
-			zones, _ := listZones(&config, client)
+			zones, _ := listZones(config, client)
 			fmt.Println(zones)
 
 		} else if args[1] == "records" {
@@ -62,7 +48,7 @@ func main() {
 			// list records
 			zoneId := args[2]
 			fmt.Println("listing records for zone", zoneId)
-			records, _ := listRecords(&config, client, zoneId)
+			records, _ := listRecords(config, client, zoneId)
 			fmt.Println(records)
 		} else {
 			fmt.Println("List wither zones or records")
@@ -70,6 +56,28 @@ func main() {
 	}
 	// ip := getIp()
 	// fmt.Println(ip)
+}
+
+func getConfig() *Config {
+	config := Config{}
+
+	pwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	data, err := os.ReadFile(path.Join(pwd, "config.yaml"))
+	if err != nil {
+		fmt.Println("Error reading config file, please create config.yaml")
+		panic(err)
+	}
+
+	err = yaml.Unmarshal(data, &config)
+	if err != nil {
+		log.Fatalf("error: %v", err)
+		panic(err)
+	}
+
+	return &config
 }
 
 func listZones(config *Config, httpc *http.Client) ([]CloudflareZone, error) {
@@ -108,7 +116,7 @@ func listRecords(config *Config, httpc *http.Client, zoneId string) ([]Cloudflar
 		return nil, err
 	}
 	req.Header.Add("Authorization", "Bearer "+config.ApiKey)
-	
+
 	response, err := httpc.Do(req)
 	if err != nil {
 		fmt.Println("Error sending HTTP request:", err)
