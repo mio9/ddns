@@ -15,13 +15,17 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Config struct {
+type CloudflareConfig struct {
 	ApiKey  string `yaml:"api-key"`
 	Records []struct {
 		Schedule string `yaml:"schedule"`
 		Name     string `yaml:"name"`
 		Id       string `yaml:"id"`
 	}
+}
+
+type Config struct {
+	Cloudflare CloudflareConfig
 }
 
 func forever() {
@@ -34,7 +38,7 @@ func startCron(config *Config, cron *cron.Cron) {
 
 	// setup cron
 
-	for _, record := range config.Records {
+	for _, record := range config.Cloudflare.Records {
 		fmt.Print(record.Schedule)
 		cron.AddFunc(record.Schedule, func() {
 			fmt.Println("updating", record.Name)
@@ -50,6 +54,14 @@ func startCron(config *Config, cron *cron.Cron) {
 	fmt.Printf("%+v\n", cron.Entries())
 }
 
+func printHelp() {
+	fmt.Println("ddns help")
+	fmt.Println("ddns ip")
+	fmt.Println("ddns list zones")
+	fmt.Println("ddns list records [zoneID]")
+	fmt.Println("ddns list jobs")
+}
+
 func main() {
 
 	// Read config file
@@ -60,18 +72,20 @@ func main() {
 
 	// setup HTTP client
 	client := &http.Client{}
+
 	// read args
 	args := os.Args[1:]
+
+	if len(args) == 0 {
+		printHelp()
+		return
+	}
 
 	if args[0] == "ip" {
 		ip := getIp()
 		fmt.Println(ip)
 	} else if args[0] == "help" {
-		fmt.Println("ddns help")
-		fmt.Println("ddns ip")
-		fmt.Println("ddns list zones")
-		fmt.Println("ddns list records [zoneID]")
-		fmt.Println("ddns list jobs")
+
 	} else if args[0] == "start" {
 		startCron(config, cron)
 
@@ -146,7 +160,7 @@ func listZones(config *Config, httpc *http.Client) ([]CloudflareZone, error) {
 		fmt.Println("Error creating HTTP request:", err)
 		return nil, err
 	}
-	req.Header.Add("Authorization", "Bearer "+config.ApiKey)
+	req.Header.Add("Authorization", "Bearer "+config.Cloudflare.ApiKey)
 	client := httpc
 
 	response, err := client.Do(req)
@@ -175,7 +189,7 @@ func listRecords(config *Config, httpc *http.Client, zoneId string) ([]Cloudflar
 		fmt.Println("Error creating HTTP request:", err)
 		return nil, err
 	}
-	req.Header.Add("Authorization", "Bearer "+config.ApiKey)
+	req.Header.Add("Authorization", "Bearer "+config.Cloudflare.ApiKey)
 
 	response, err := httpc.Do(req)
 	if err != nil {
