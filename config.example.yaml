@@ -1,1 +1,6 @@
 api-key: 130GHJLE-AtAydfghuilw3yb9prt8jVdc1wO81Sd
+
+records:
+- schedule: "* 1 * * *"
+  name: "example.com"
+  id: 133da48fb55f74f035871a49c65a4255

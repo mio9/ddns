@@ -9,17 +9,55 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
+	"github.com/robfig/cron/v3"
 	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	ApiKey string `yaml:"api-key"`
+	ApiKey  string `yaml:"api-key"`
+	Records []struct {
+		Schedule string `yaml:"schedule"`
+		Name     string `yaml:"name"`
+		Id       string `yaml:"id"`
+	}
+}
+
+func forever() {
+	for {
+		time.Sleep(time.Hour)
+	}
+}
+
+func startCron(config *Config, cron *cron.Cron) {
+
+	// setup cron
+
+	for _, record := range config.Records {
+		fmt.Print(record.Schedule)
+		cron.AddFunc(record.Schedule, func() {
+			fmt.Println("updating", record.Name)
+			// update record
+			updateRecord(config, record.Id)
+		})
+	}
+	fmt.Printf("%+v\n", config)
+
+	fmt.Printf("Cron started at %v+\n", time.Now())
+
+	cron.Start()
+	fmt.Printf("%+v\n", cron.Entries())
 }
 
 func main() {
+
 	// Read config file
 	config := getConfig()
+
+	// setup cron
+	cron := cron.New()
+
 	// setup HTTP client
 	client := &http.Client{}
 	// read args
@@ -28,10 +66,21 @@ func main() {
 	if args[0] == "ip" {
 		ip := getIp()
 		fmt.Println(ip)
+	} else if args[0] == "help" {
+		fmt.Println("ddns help")
+		fmt.Println("ddns ip")
+		fmt.Println("ddns list zones")
+		fmt.Println("ddns list records [zoneID]")
+		fmt.Println("ddns list jobs")
+	} else if args[0] == "start" {
+		startCron(config, cron)
+
+		go forever()
+		select {}
 	} else if args[0] == "list" {
 
 		if len(args) < 2 {
-			fmt.Println("List what?")
+			fmt.Println("Specify resources to list, available resources are: zones, records")
 			return
 
 		}
@@ -51,14 +100,22 @@ func main() {
 			fmt.Println("listing records for zone", zoneId)
 			records, _ := listRecords(config, client, zoneId)
 			fmt.Println(records)
+		} else if args[1] == "jobs" {
+			// list cron jobs
+			fmt.Printf("%+v\n", cron.Entries())
 		} else {
-			fmt.Println("List wither zones or records")
+			fmt.Println("Specify resources to list, available resources are: zones, records")
 		}
 	} else {
 		fmt.Println("Unknown commands, run `ddns help` for help")
+
 	}
 	// ip := getIp()
 	// fmt.Println(ip)
+}
+
+func updateRecord(config *Config, id string) {
+	fmt.Println("Updating record" + id)
 }
 
 func getConfig() *Config {
