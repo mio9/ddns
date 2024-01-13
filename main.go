@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -53,6 +54,8 @@ func main() {
 		} else {
 			fmt.Println("List wither zones or records")
 		}
+	} else {
+		fmt.Println("Unknown commands, run `ddns help` for help")
 	}
 	// ip := getIp()
 	// fmt.Println(ip)
@@ -148,5 +151,5 @@ func getIp() string {
 		panic(err)
 	}
 
-	return string(body)
+	return strings.TrimSpace(string(body))
 }
