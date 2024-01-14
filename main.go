@@ -44,9 +44,15 @@ func startCron(config *Config, cron *cron.Cron, httpClient *http.Client) {
 	for _, record := range config.Cloudflare.Records {
 		fmt.Print(record.Schedule)
 		cron.AddFunc(record.Schedule, func() {
-			fmt.Println("updating", record.Name)
+			fmt.Println("[Job] Updating ", record.Name)
 			// update record
-			updateRecord(config, httpClient, record.ZoneID, record.Id, record.Name)
+			success, err := updateRecord(config, httpClient, record.ZoneID, record.Id, record.Name)
+			if err != nil {
+				fmt.Printf("Error: %+v\n", err)
+			}
+			if success {
+				fmt.Println("[Job OK] Updated for ", record.Name)
+			}
 		})
 	}
 	fmt.Printf("%+v\n", config)
@@ -123,6 +129,16 @@ func main() {
 		} else {
 			fmt.Println("Specify resources to list, available resources are: zones, records")
 		}
+	} else if args[0] == "hammer" {
+		for _, record := range config.Cloudflare.Records {
+			fmt.Println("updating", record.Name)
+			// update record
+			success, err := updateRecord(config, client, record.ZoneID, record.Id, record.Name)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(success)
+		}
 	} else {
 		fmt.Println("Unknown commands, run `ddns help` for help")
 
@@ -133,7 +149,7 @@ func main() {
 
 func updateRecord(config *Config, client *http.Client, zoneId string, recordId string, name string) (bool, error) {
 	ip := getIp(config)
-	fmt.Println("Updating record" + recordId)
+	fmt.Println("Updating record " + recordId)
 	jsonData, err := json.Marshal(CloudflarePatchDNSBody{
 		Content: ip,
 		Name:    name,
@@ -142,7 +158,7 @@ func updateRecord(config *Config, client *http.Client, zoneId string, recordId s
 		log.Fatal(err)
 	}
 
-	req, err := http.NewRequest("POST", "https://api.cloudflare.com/client/v4/zones/"+zoneId+"/dns_records/"+recordId, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("PATCH", "https://api.cloudflare.com/client/v4/zones/"+zoneId+"/dns_records/"+recordId, bytes.NewBuffer(jsonData))
 	if err != nil {
 		fmt.Println("Error creating HTTP request:", err)
 		return false, err
@@ -161,6 +177,11 @@ func updateRecord(config *Config, client *http.Client, zoneId string, recordId s
 	err = json.NewDecoder(response.Body).Decode(&result)
 	if err != nil {
 		fmt.Println("Error decoding JSON response:", err)
+		return false, err
+	}
+
+	if !result.Success {
+		fmt.Printf("Error: %+v\n", result)
 		return false, err
 	}
 
@@ -242,7 +263,7 @@ func listRecords(config *Config, httpc *http.Client, zoneId string) ([]Cloudflar
 
 	for index, value := range result.Result {
 		records = append(records, CloudflareRecords{RecordID: value.ID, Name: value.Name, Content: value.Content})
-		fmt.Println(index, value.Name, value.ID)
+		fmt.Println(index, value.Name, value.ID, value.Content)
 	}
 	return records, nil
 }
