@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -35,7 +36,7 @@ func forever() {
 	}
 }
 
-func startCron(config *Config, cron *cron.Cron) {
+func startCron(config *Config, cron *cron.Cron, httpClient *http.Client) {
 
 	// setup cron
 
@@ -44,7 +45,7 @@ func startCron(config *Config, cron *cron.Cron) {
 		cron.AddFunc(record.Schedule, func() {
 			fmt.Println("updating", record.Name)
 			// update record
-			updateRecord(config, record.ZoneID, record.Id)
+			updateRecord(config, httpClient, record.ZoneID, record.Id, record.Name)
 		})
 	}
 	fmt.Printf("%+v\n", config)
@@ -88,7 +89,7 @@ func main() {
 	} else if args[0] == "help" {
 
 	} else if args[0] == "start" {
-		startCron(config, cron)
+		startCron(config, cron, client)
 
 		go forever()
 		select {}
@@ -129,9 +130,40 @@ func main() {
 	// fmt.Println(ip)
 }
 
-func updateRecord(config *Config, zoneId string, recordId string) {
+func updateRecord(config *Config, client *http.Client, zoneId string, recordId string, name string) (bool, error) {
+	ip := getIp()
 	fmt.Println("Updating record" + recordId)
-	req, err := http.NewRequest("GET", "https://api.cloudflare.com/client/v4/zones/"+zoneId+"/dns_records/"+recordId, nil)
+	jsonData, err := json.Marshal(CloudflarePatchDNSBody{
+		Content: ip,
+		Name:    name,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	req, err := http.NewRequest("POST", "https://api.cloudflare.com/client/v4/zones/"+zoneId+"/dns_records/"+recordId, bytes.NewBuffer(jsonData))
+	if err != nil {
+		fmt.Println("Error creating HTTP request:", err)
+		return false, err
+	}
+	req.Header.Add("Authorization", "Bearer "+config.Cloudflare.ApiKey)
+
+	response, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Error sending HTTP request:", err)
+		return false, err
+	}
+	defer response.Body.Close()
+
+	result := CloudflarePatchDNSResponse{}
+
+	err = json.NewDecoder(response.Body).Decode(&result)
+	if err != nil {
+		fmt.Println("Error decoding JSON response:", err)
+		return false, err
+	}
+
+	return true, nil
 
 }
 
