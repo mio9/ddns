@@ -1,3 +1,5 @@
+ip-provider: https://myip.wtf/text
+
 # Cloudflare API key
 cloudflare:
   api-key: 130GHJLE-AtAydfghuilw3yb9prt8jVdc1wO81Sd

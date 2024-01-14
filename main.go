@@ -28,6 +28,7 @@ type CloudflareConfig struct {
 
 type Config struct {
 	Cloudflare CloudflareConfig
+	IpProvider string `yaml:"ip-provider"`
 }
 
 func forever() {
@@ -84,7 +85,7 @@ func main() {
 	}
 
 	if args[0] == "ip" {
-		ip := getIp()
+		ip := getIp(config)
 		fmt.Println(ip)
 	} else if args[0] == "help" {
 
@@ -131,7 +132,7 @@ func main() {
 }
 
 func updateRecord(config *Config, client *http.Client, zoneId string, recordId string, name string) (bool, error) {
-	ip := getIp()
+	ip := getIp(config)
 	fmt.Println("Updating record" + recordId)
 	jsonData, err := json.Marshal(CloudflarePatchDNSBody{
 		Content: ip,
@@ -246,8 +247,8 @@ func listRecords(config *Config, httpc *http.Client, zoneId string) ([]Cloudflar
 	return records, nil
 }
 
-func getIp() string {
-	resp, err := http.Get("https://myip.wtf/text")
+func getIp(config *Config) string {
+	resp, err := http.Get(config.IpProvider)
 	if err != nil {
 		panic(err)
 	}
