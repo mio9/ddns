@@ -18,3 +18,7 @@ The shitty cloudflare ddns client i made for myself to use, painful stuff as a t
 7. Done
 
 > Extremely tedious to setup right? That's the point :)
+
+## Contribution
+
+This project features extremely shitty go code. Pls feel free to fork this out and make some PR, my brain is too shitty to write some good go code as a 9-years JS kid
