@@ -64,11 +64,13 @@ func startCron(config *Config, cron *cron.Cron, httpClient *http.Client) {
 }
 
 func printHelp() {
-	fmt.Println("ddns help")
-	fmt.Println("ddns ip")
-	fmt.Println("ddns list zones")
-	fmt.Println("ddns list records [zoneID]")
-	fmt.Println("ddns list jobs")
+	fmt.Println("ddns help            - Get this help text")
+	fmt.Println("ddns ip              - Get your current external IP address")
+	fmt.Println("ddns list zones      - List cloudflare zones")
+	fmt.Println("ddns list records [zoneID] - List cloudflare records")
+	fmt.Println("ddns list jobs       - List your scheduled jobs in config")
+	fmt.Println("ddns start           - Start the cron job")
+	fmt.Println("ddns hammer          - Force update your jobs with current IP, use with a hammer")
 }
 
 func main() {
@@ -94,7 +96,7 @@ func main() {
 		ip := getIp(config)
 		fmt.Println(ip)
 	} else if args[0] == "help" {
-
+		printHelp()
 	} else if args[0] == "start" {
 		startCron(config, cron, client)
 
