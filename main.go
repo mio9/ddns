@@ -21,6 +21,7 @@ type CloudflareConfig struct {
 		Schedule string `yaml:"schedule"`
 		Name     string `yaml:"name"`
 		Id       string `yaml:"id"`
+		ZoneID   string `yaml:"zone-id"`
 	}
 }
 
@@ -43,7 +44,7 @@ func startCron(config *Config, cron *cron.Cron) {
 		cron.AddFunc(record.Schedule, func() {
 			fmt.Println("updating", record.Name)
 			// update record
-			updateRecord(config, record.Id)
+			updateRecord(config, record.ZoneID, record.Id)
 		})
 	}
 	fmt.Printf("%+v\n", config)
@@ -128,8 +129,10 @@ func main() {
 	// fmt.Println(ip)
 }
 
-func updateRecord(config *Config, id string) {
-	fmt.Println("Updating record" + id)
+func updateRecord(config *Config, zoneId string, recordId string) {
+	fmt.Println("Updating record" + recordId)
+	req, err := http.NewRequest("GET", "https://api.cloudflare.com/client/v4/zones/"+zoneId+"/dns_records/"+recordId, nil)
+
 }
 
 func getConfig() *Config {

@@ -6,3 +6,4 @@ cloudflare:
   - schedule: "@every 1h" # Supports cron syntax, build and verify your cron string https://crontab.guru/
     name: "home.example.com"
     id: 133da48fb55f74f035871a49c65a4255
+    zone-id: 55f74f0346843adb3843c1
