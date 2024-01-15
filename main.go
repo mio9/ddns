@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -193,11 +194,12 @@ func updateRecord(config *Config, client *http.Client, zoneId string, recordId s
 
 func getConfig() *Config {
 	config := Config{}
-
-	pwd, err := os.Getwd()
+	ex, err := os.Executable()
 	if err != nil {
 		panic(err)
 	}
+	pwd := filepath.Dir(ex)
+
 	data, err := os.ReadFile(path.Join(pwd, "config.yaml"))
 	if err != nil {
 		fmt.Println("Error reading config file, please create config.yaml")
