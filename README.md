@@ -17,7 +17,7 @@ The shitty cloudflare ddns client i made for myself to use, painful stuff as a t
 6. Set correct name for your subdomain / domain name
 7. Done
 
-> Extremely tedious to setup right? That's the point :)
+> Extremely tedious to setup right? i know lol but that's the thing of later :)
 
 ## Contribution
 
