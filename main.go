@@ -39,7 +39,6 @@ func forever() {
 }
 
 func startCron(config *Config, cron *cron.Cron, httpClient *http.Client) {
-
 	// setup cron
 
 	for _, record := range config.Cloudflare.Records {
@@ -72,12 +71,18 @@ func printHelp() {
 	fmt.Println("ddns list jobs       - List your scheduled jobs in config")
 	fmt.Println("ddns start           - Start the cron job")
 	fmt.Println("ddns hammer          - Force update your jobs with current IP, use with a hammer")
+	fmt.Println("\n Arguments:")
+	fmt.Println("--config [file]      - Provide config file (default config.yaml)")
 }
 
 func main() {
+	// read args
+	args := os.Args[1:]
 
-	// Read config file
-	config := getConfig()
+	if len(args) == 0 || args[0] == "help" {
+		printHelp()
+		return
+	}
 
 	// setup cron
 	cron := cron.New()
@@ -85,13 +90,8 @@ func main() {
 	// setup HTTP client
 	client := &http.Client{}
 
-	// read args
-	args := os.Args[1:]
-
-	if len(args) == 0 {
-		printHelp()
-		return
-	}
+	// Read config file
+	config := getConfig()
 
 	if args[0] == "ip" {
 		ip := getIp(config)
@@ -144,7 +144,6 @@ func main() {
 		}
 	} else {
 		fmt.Println("Unknown commands, run `ddns help` for help")
-
 	}
 	// ip := getIp()
 	// fmt.Println(ip)
@@ -189,7 +188,6 @@ func updateRecord(config *Config, client *http.Client, zoneId string, recordId s
 	}
 
 	return true, nil
-
 }
 
 func getConfig() *Config {
