@@ -157,7 +157,7 @@ func updateRecord(config *Config, client *http.Client, zoneId string, recordId s
 		Name:    name,
 	})
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	req, err := http.NewRequest("PATCH", "https://api.cloudflare.com/client/v4/zones/"+zoneId+"/dns_records/"+recordId, bytes.NewBuffer(jsonData))
