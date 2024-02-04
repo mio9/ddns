@@ -8,6 +8,7 @@ The shitty cloudflare ddns client i made for myself to use, painful stuff as a t
 
 - `list zones` - List your zones
 - `list records [zoneID]` - list your records
+- `ddns help`            - Get this help text
 
 
 ## Setup

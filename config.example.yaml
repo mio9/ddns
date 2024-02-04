@@ -1,4 +1,4 @@
-ip-provider: https://api.ipify.org  # or any other endpoint that gives IP in plain text like https://myip.wtf/text
+ip-provider: https://api.ipify.org  # or any other endpoint that gives IP in plain text like https://myip.wtf/text .
 
 # Cloudflare API key
 cloudflare:
