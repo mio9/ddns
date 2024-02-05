@@ -1,0 +1,14 @@
+# any other endpoint that gives IP in plain text like https://myip.wtf/text
+ip_provider = "https://api.ipify.org"
+
+
+[cloudflare]
+
+api_key = "130GHJLE-AtAydfghuilw3yb9prt8jVdc1wO81Sd"
+
+[[records]]
+# Supports cron syntax, build and verify your cron string https://crontab.guru/
+schedule = "@every 1h"
+name = "home.example.com"
+id = "133da48fb55f74f035871a49c65a4255"
+zone-id = "55f74f0346843adb3843c1"
