@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -11,11 +12,10 @@ import (
 	"path"
 	"strings"
 	"time"
-	"flag"
+
 	"github.com/robfig/cron/v3"
 	"github.com/rodaine/table"
 )
-
 
 func forever() {
 	for {
@@ -36,7 +36,7 @@ func startCron(config *Config, cron *cron.Cron, httpClient *http.Client) {
 				fmt.Printf("Error: %+v\n", err)
 			}
 			if success {
-				fmt.Println("[Job OK] Updated for ", record.Name)
+				fmt.Printf("[%s][Job OK] Updated for %s\n",time.Now().Format("2006-01-02 15:04:05"), record.Name)
 			}
 		})
 	}
@@ -87,7 +87,6 @@ func main() {
 	flag.StringVar(&configPath, "f", path.Join(wd, "config.yaml"), "Path to config file")
 	flag.Parse()
 	
-	// fmt.Println(flag.Args())
 	args := flag.Args()
 
 	if len(args) == 0 || args[0] == "help" {
@@ -161,6 +160,8 @@ func main() {
 			}
 			fmt.Println(success)
 		}
+	} else if args[0] == "abc" {
+		fmt.Println(time.Now().Format("2006-01-02 15:04:05"))
 	} else {
 		fmt.Println("Unknown commands, run `ddns help` for help")
 	}
