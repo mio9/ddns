@@ -9,10 +9,9 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 	"time"
-
+	"flag"
 	"github.com/robfig/cron/v3"
 	"gopkg.in/yaml.v3"
 )
@@ -64,20 +63,46 @@ func startCron(config *Config, cron *cron.Cron, httpClient *http.Client) {
 }
 
 func printHelp() {
-	fmt.Println("ddns help            - Get this help text")
-	fmt.Println("ddns ip              - Get your current external IP address")
-	fmt.Println("ddns list zones      - List cloudflare zones")
-	fmt.Println("ddns list records [zoneID] - List cloudflare records")
-	fmt.Println("ddns list jobs       - List your scheduled jobs in config")
-	fmt.Println("ddns start           - Start the cron job")
-	fmt.Println("ddns hammer          - Force update your jobs with current IP, use with a hammer")
-	fmt.Println("\n Arguments:")
-	fmt.Println("--config [file]      - Provide config file (default config.yaml)")
+	helpString := `
+Usage: 
+
+	ddns [options] [command]
+
+Commands:
+
+	help				- Get this help text
+	ip				- Get your current external IP address
+	list zones			- List cloudflare zones
+	list records [zoneID]		- List cloudflare records
+	list jobs			- List your scheduled jobs in config
+	start				- Start the cron job
+	hammer				- Force update your jobs with current IP, use with a hammer
+	
+Options:
+
+	-f [path]      - Provide config file path (default config.yaml)
+	`
+	fmt.Print(helpString)
+	// fmt.Println("ddns help            - Get this help text")
+	// fmt.Println("ddns ip              - Get your current external IP address")
+	// fmt.Println("ddns list zones      - List cloudflare zones")
+	// fmt.Println("ddns list records [zoneID] - List cloudflare records")
+	// fmt.Println("ddns list jobs       - List your scheduled jobs in config")
+	// fmt.Println("ddns start           - Start the cron job")
+	// fmt.Println("ddns hammer          - Force update your jobs with current IP, use with a hammer")
+	// fmt.Println("\n Arguments:")
+	// fmt.Println("-f [path]            - Provide config file path (default config.yaml)")
 }
 
 func main() {
 	// read args
-	args := os.Args[1:]
+	wd, _ := os.Getwd()
+	var configPath string
+	flag.StringVar(&configPath, "f", path.Join(wd, "config.yaml"), "Path to config file")
+	flag.Parse()
+	
+	fmt.Println(flag.Args())
+	args := flag.Args()
 
 	if len(args) == 0 || args[0] == "help" {
 		printHelp()
@@ -91,7 +116,7 @@ func main() {
 	client := &http.Client{}
 
 	// Read config file
-	config := getConfig()
+	config := getConfig(configPath)
 
 	if args[0] == "ip" {
 		ip := getIp(config)
@@ -190,17 +215,13 @@ func updateRecord(config *Config, client *http.Client, zoneId string, recordId s
 	return true, nil
 }
 
-func getConfig() *Config {
+func getConfig(configPath string) *Config {
 	config := Config{}
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	pwd := filepath.Dir(ex)
+	// fmt.Println("Using config file: " + configPath)
 
-	data, err := os.ReadFile(path.Join(pwd, "config.yaml"))
+	data, err := os.ReadFile(configPath)
 	if err != nil {
-		fmt.Println("Error reading config file, please create config.yaml")
+		fmt.Println("Error reading config file, please create/supply a config file")
 		panic(err)
 	}
 

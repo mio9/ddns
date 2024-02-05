@@ -6,9 +6,25 @@ The shitty cloudflare ddns client i made for myself to use, painful stuff as a t
 
 ## Commands
 
-- `list zones` - List your zones
-- `list records [zoneID]` - list your records
-- `ddns help`            - Get this help text
+```
+Usage: 
+
+        ddns [options] [command]
+
+Commands:
+
+        help                            - Get this help text
+        ip                              - Get your current external IP address
+        list zones                      - List cloudflare zones
+        list records [zoneID]           - List cloudflare records
+        list jobs                       - List your scheduled jobs in config
+        start                           - Start the cron job
+        hammer                          - Force update your jobs with current IP, use with a hammer
+
+Options:
+
+        -f [path]      - Provide config file path (default config.yaml)
+```
 
 
 ## Setup
