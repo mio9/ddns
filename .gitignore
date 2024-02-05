@@ -3,3 +3,4 @@ dist/
 ddns
 ddns.exe
 config.yaml
+config.toml

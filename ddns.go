@@ -13,6 +13,7 @@ import (
 	"time"
 	"flag"
 	"github.com/robfig/cron/v3"
+	"github.com/rodaine/table"
 )
 
 
@@ -86,7 +87,7 @@ func main() {
 	flag.StringVar(&configPath, "f", path.Join(wd, "config.yaml"), "Path to config file")
 	flag.Parse()
 	
-	fmt.Println(flag.Args())
+	// fmt.Println(flag.Args())
 	args := flag.Args()
 
 	if len(args) == 0 || args[0] == "help" {
@@ -122,9 +123,13 @@ func main() {
 		}
 		if args[1] == "zones" {
 			// list zones
-			fmt.Println("listing zones")
 			zones, _ := listZones(config, client)
-			fmt.Println(zones)
+			tbl := table.New("Name", "ID")
+			for _, zone := range zones {
+				tbl.AddRow(zone.Name, zone.ZoneID)
+			}
+			tbl.Print()
+			return
 
 		} else if args[1] == "records" {
 			if len(args) < 3 {
@@ -133,9 +138,13 @@ func main() {
 			}
 			// list records
 			zoneId := args[2]
-			fmt.Println("listing records for zone", zoneId)
 			records, _ := listRecords(config, client, zoneId)
-			fmt.Println(records)
+			tbl := table.New("Name", "Content", "ID")
+			for _, record := range records {
+				tbl.AddRow(record.Name, record.Content, record.RecordID)
+			}
+			tbl.Print()
+			return
 		} else if args[1] == "jobs" {
 			// list cron jobs
 			fmt.Printf("%+v\n", cron.Entries())
@@ -222,10 +231,15 @@ func listZones(config *Config, httpc *http.Client) ([]CloudflareZone, error) {
 
 	zones := []CloudflareZone{}
 
-	for index, value := range result.Result {
+
+	for _, value := range result.Result {
 		zones = append(zones, CloudflareZone{ZoneID: value.ID, Name: value.Name})
-		fmt.Println(index, value.Name, value.ID)
+		// fmt.Println(index, value.Name, value.ID)
 	}
+
+	
+
+
 	return zones, nil
 }
 
@@ -250,9 +264,8 @@ func listRecords(config *Config, httpc *http.Client, zoneId string) ([]Cloudflar
 
 	records := []CloudflareRecords{}
 
-	for index, value := range result.Result {
+	for _, value := range result.Result {
 		records = append(records, CloudflareRecords{RecordID: value.ID, Name: value.Name, Content: value.Content})
-		fmt.Println(index, value.Name, value.ID, value.Content)
 	}
 	return records, nil
 }
