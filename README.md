@@ -1,8 +1,9 @@
-# DDNS-GO
+# DDNSC
 
-The shitty cloudflare ddns client i made for myself to use, painful stuff as a typescript writer
+The shitty cloudflare ddns client i made for myself to use, painful stuff as a typescript kid
 ![929](https://github.com/mio9/ddns/assets/11581624/3ac55ae3-f408-4e69-a959-e4f213cc40cf)
 
+> (Previously named DDNS-GO)
 
 ## Commands
 
